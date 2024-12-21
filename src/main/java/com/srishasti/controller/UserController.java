@@ -5,14 +5,14 @@ import com.srishasti.model.User;
 import com.srishasti.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+//@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 @RestController
 public class UserController {
 
@@ -31,7 +31,20 @@ public class UserController {
         String string = userService.verifyUser(user);
         if(string.isEmpty())
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        return new ResponseEntity<>(string, HttpStatus.OK);
+
+        ResponseCookie cookie = ResponseCookie.from("jwt",string)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("None")
+                .path("/")
+                .maxAge(60*60)
+                .build();
+
+        System.out.println("Cookie is sent in next line.");
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,cookie.toString())
+                .body("Login Successful") ;
+
     }
 
     @GetMapping("/")

@@ -35,7 +35,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("login","register").permitAll()
                         .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
+                //.httpBasic(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(request -> {
+                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+                    corsConfig.addAllowedOrigin("http://localhost:5173"); // React frontend origin
+                    corsConfig.addAllowedMethod("*"); // Allow all HTTP methods
+                    corsConfig.addAllowedHeader("*"); // Allow all headers
+                    corsConfig.setAllowCredentials(true); // Enable cookies
+                    return corsConfig;
+                }))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
