@@ -31,6 +31,12 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        if (request.getRequestURI().equals("/login") || request.getRequestURI().equals("/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        // An expired JWT token would cause exception. Bypass the filter to avoid exception when carrying on expired tokens for non-authentication uris.
+
         String token = null;
         String username = null;
 
@@ -43,20 +49,16 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         }
-
-        if (token != null)
+        if (token != null){
             username = jwtService.extractUserName(token);
+        }
 
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
             UserDetails userDetails = context.getBean(SecurityUserDetailsService.class).loadUserByUsername(username);
-
             if (jwtService.validateToken(token, userDetails)) {
-
                 int userId = jwtService.extractUserId(token);
                 UserContext.setUserId(userId);
-
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authToken.setDetails(new WebAuthenticationDetailsSource()
                         .buildDetails(request));

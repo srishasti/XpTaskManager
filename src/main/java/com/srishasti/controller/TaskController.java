@@ -1,5 +1,6 @@
 package com.srishasti.controller;
 
+import com.srishasti.context.UserContext;
 import com.srishasti.model.Task;
 import com.srishasti.service.TaskService;
 import jakarta.validation.Valid;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,8 @@ public class TaskController {
             "no_content" , HttpStatus.OK,
             "conflict", HttpStatus.CONFLICT,
             "bad_request", HttpStatus.BAD_REQUEST,
-            "ok", HttpStatus.OK
+            "ok", HttpStatus.OK,
+            "not_found",HttpStatus.NOT_FOUND
     ));
 
     @GetMapping("/tasks")
@@ -32,12 +35,13 @@ public class TaskController {
         if(tasks.isEmpty())
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         return new ResponseEntity<>(tasks, HttpStatus.OK);
+
     }
 
     @GetMapping("/tasks/{taskId}")
     public ResponseEntity<Task> getTask(@PathVariable int taskId){
         Task task = taskService.getTask(taskId);
-        if(task == null) return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if(task == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 

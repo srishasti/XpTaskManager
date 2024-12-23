@@ -31,7 +31,7 @@ public class TaskService {
     public String completeTask(int taskId) {
 
         Task task = taskRepo.findById(taskId).orElse(null);
-        if(task == null) return "no_content";
+        if(task == null) return "not_found";
         if(task.getUserId() != UserContext.getUserId()) return "bad_request";
         if(task.getStatus().equals("completed")) return "conflict";
 
@@ -53,7 +53,7 @@ public class TaskService {
 
     public String deleteTask(int taskId) {
         Task task = taskRepo.findById(taskId).orElse(null);
-        if(task == null) return "no_content";
+        if(task == null) return "not_found";
         if(task.getUserId() != UserContext.getUserId()) return "bad_request";
 
         taskRepo.deleteById(taskId);

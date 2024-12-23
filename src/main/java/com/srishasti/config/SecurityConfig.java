@@ -17,6 +17,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -39,9 +41,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     var corsConfig = new org.springframework.web.cors.CorsConfiguration();
                     corsConfig.addAllowedOrigin("http://localhost:5173"); // React frontend origin
-                    corsConfig.addAllowedMethod("*"); // Allow all HTTP methods
+                    corsConfig.addAllowedMethod("GET");
+                    corsConfig.addAllowedMethod("PUT");
+                    corsConfig.addAllowedMethod("POST");
+                    corsConfig.addAllowedMethod("DELETE");
+                    corsConfig.addAllowedMethod("OPTIONS");
                     corsConfig.addAllowedHeader("*"); // Allow all headers
-                    corsConfig.setAllowCredentials(true); // Enable cookies
+                    corsConfig.setAllowCredentials(true);
+                    corsConfig.setMaxAge(3600L);// Enable cookies
                     return corsConfig;
                 }))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -35,22 +35,16 @@ public class UserController {
         ResponseCookie cookie = ResponseCookie.from("jwt",string)
                 .httpOnly(true)
                 .secure(false)
-                .sameSite("None")
+                .sameSite("Lax")
                 .path("/")
                 .maxAge(60*60)
                 .build();
-
-        System.out.println("Cookie is sent in next line.");
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,cookie.toString())
                 .body("Login Successful") ;
 
     }
 
-    @GetMapping("/")
-    public ResponseEntity<String> home(){
-        return new ResponseEntity<>(" pls work. your user id is "+ UserContext.getUserId(), HttpStatus.OK);
-    }
 
     @GetMapping("/profile")
     public User getProfile(){
