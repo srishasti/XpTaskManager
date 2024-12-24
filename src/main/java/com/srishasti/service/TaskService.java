@@ -7,6 +7,7 @@ import com.srishasti.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -23,9 +24,24 @@ public class TaskService {
         return taskRepo.findByUserId(userId);
     }
 
-    public void addTask(Task task) {
+    public Task addTask(Task task) {
+
+        if(task.getDeadline() != null){
+            if(task.getDeadline().isBefore(LocalDate.now())){
+                task.setStatus("overdue");
+                String difficulty = task.getDifficulty();
+                int userId = UserContext.getUserId();
+                if(difficulty.equals("easy"))
+                    profileService.changeHealth(userId,3);
+                else if (difficulty.equals("medium"))
+                    profileService.changeHealth(userId, 5);
+                else profileService.changeHealth(userId, 7);
+            }
+        }
+
         task.setUserId(UserContext.getUserId());
         taskRepo.save(task);
+        return task;
     }
 
     public String completeTask(int taskId) {

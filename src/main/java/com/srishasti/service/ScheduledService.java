@@ -35,14 +35,15 @@ public class ScheduledService {
     public void initializeServer(){
         MetaData metaData = metaDataRepo.findById("lastProcessed").orElse(null);
         if(metaData == null || metaData.getValue() == null){
-            metaData = new MetaData();
-            metaData.setMetakey("lastProcessed");
-            metaData.setValue("2004-05-12");
-        }
-        LocalDate lastProcessed =  LocalDate.parse(metaData.getValue());
-        if(!lastProcessed.equals(LocalDate.now())){
             scheduledProcess();
         }
+        else{
+            LocalDate lastProcessed =  LocalDate.parse(metaData.getValue());
+            if(!lastProcessed.equals(LocalDate.now())){
+                scheduledProcess();
+            }
+        }
+
     }
 
 }

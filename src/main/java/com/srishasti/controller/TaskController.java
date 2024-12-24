@@ -46,20 +46,20 @@ public class TaskController {
     }
 
     @PostMapping("/tasks")
-    public ResponseEntity<List<Task>> addTask(@Valid @RequestBody Task task){
-        taskService.addTask(task);
-        return new ResponseEntity<>(taskService.getTasks(),HttpStatus.OK);
+    public ResponseEntity<Task> addTask(@Valid @RequestBody Task task){
+        Task newTask = taskService.addTask(task);
+        return new ResponseEntity<>(newTask, HttpStatus.OK);
     }
 
     @PutMapping("/tasks/{taskId}")
-    public ResponseEntity<List<Task>> completeTask(@PathVariable int taskId){
+    public ResponseEntity<?> completeTask(@PathVariable int taskId){
         String string = taskService.completeTask(taskId);
-        return new ResponseEntity<>(taskService.getTasks(),statusMap.getOrDefault(string,HttpStatus.INTERNAL_SERVER_ERROR));
+        return new ResponseEntity<>(statusMap.getOrDefault(string,HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     @DeleteMapping("/tasks/{taskId}")
-    public ResponseEntity<List<Task>> deleteTask(@PathVariable int taskId){
+    public ResponseEntity<?> deleteTask(@PathVariable int taskId){
         String string = taskService.deleteTask(taskId);
-        return new ResponseEntity<>(taskService.getTasks(),statusMap.getOrDefault(string,HttpStatus.INTERNAL_SERVER_ERROR));
+        return new ResponseEntity<>(statusMap.getOrDefault(string,HttpStatus.INTERNAL_SERVER_ERROR));
     }
 }
