@@ -25,9 +25,16 @@ public class UserService {
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public void addUser(User user){
-        user.setPassword(encoder.encode(user.getPassword()));
-        userRepo.save(user);
+    public String addUser(User user){
+        User existingUser = userRepo.findByUsername(user.getUsername());
+        if(existingUser == null){
+            user.setPassword(encoder.encode(user.getPassword()));
+            userRepo.save(user);
+            int userId = userRepo.findByUsername(user.getUsername()).getId();
+            return jwtService.generateToken(user.getUsername(), userId);
+        }
+        return "";
+
     }
 
 
