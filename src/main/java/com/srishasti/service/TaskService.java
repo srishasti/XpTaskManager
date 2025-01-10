@@ -2,8 +2,8 @@ package com.srishasti.service;
 
 import com.srishasti.context.UserContext;
 import com.srishasti.model.Task;
+import com.srishasti.model.TaskUpdate;
 import com.srishasti.repo.TaskRepo;
-import com.srishasti.repo.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +24,12 @@ public class TaskService {
         return taskRepo.findByUserId(userId);
     }
 
-    public Task addTask(Task task) {
+    public TaskUpdate addTask(Task task) {
+
+        int healthChanged = 0;
+        int xpChanged = 0;
+
+        if(task.getDifficulty().isEmpty()) task.setDifficulty("easy");
 
         if(task.getDeadline() != null){
             if(task.getDeadline().isBefore(LocalDate.now())){
@@ -32,24 +37,30 @@ public class TaskService {
                 String difficulty = task.getDifficulty();
                 int userId = UserContext.getUserId();
                 if(difficulty.equals("easy"))
-                    profileService.changeHealth(userId,3);
+                    healthChanged = 3;
                 else if (difficulty.equals("medium"))
-                    profileService.changeHealth(userId, 5);
-                else profileService.changeHealth(userId, 7);
+                    healthChanged = 5;
+                else healthChanged = 7;
+                profileService.changeHealth(userId, healthChanged);
             }
         }
 
         task.setUserId(UserContext.getUserId());
         taskRepo.save(task);
-        return task;
+
+        TaskUpdate update = new TaskUpdate(task,"ok",xpChanged,healthChanged);
+        return update;
     }
 
-    public String completeTask(int taskId) {
+    public TaskUpdate completeTask(int taskId) {
+
+        int healthChanged = 0;
+        int xpChanged = 0;
 
         Task task = taskRepo.findById(taskId).orElse(null);
-        if(task == null) return "not_found";
-        if(task.getUserId() != UserContext.getUserId()) return "bad_request";
-        if(task.getStatus().equals("completed")) return "conflict";
+        if(task == null) return new TaskUpdate("not_found");
+        if(task.getUserId() != UserContext.getUserId()) return new TaskUpdate("bad_request");
+        if(task.getStatus().equals("completed")) return new TaskUpdate("conflict");
 
         int penaltyFactor = 1;
         if(task.getStatus().equals("overdue")) penaltyFactor = 2;
@@ -58,22 +69,24 @@ public class TaskService {
         taskRepo.save(task);
 
         if(task.getDifficulty().equals("easy"))
-            profileService.changeXp(10/penaltyFactor);
+            xpChanged = 10/penaltyFactor;
         else if (task.getDifficulty().equals("medium"))
-            profileService.changeXp(15/penaltyFactor);
-        else profileService.changeXp(20/penaltyFactor);
+            xpChanged = 15/penaltyFactor;
+        else xpChanged = 20/penaltyFactor;
 
-        return "ok";
+        profileService.changeXp(xpChanged/penaltyFactor);
+
+        return new TaskUpdate(task,"ok",xpChanged,healthChanged);
 
     }
 
-    public String deleteTask(int taskId) {
+    public TaskUpdate deleteTask(int taskId) {
         Task task = taskRepo.findById(taskId).orElse(null);
-        if(task == null) return "not_found";
-        if(task.getUserId() != UserContext.getUserId()) return "bad_request";
+        if(task == null) return new TaskUpdate("not_found");
+        if(task.getUserId() != UserContext.getUserId()) return new TaskUpdate("bad_request");
 
         taskRepo.deleteById(taskId);
-        return "ok";
+        return new TaskUpdate(task,"ok",0,0);
 
     }
 

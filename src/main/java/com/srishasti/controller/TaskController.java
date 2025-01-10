@@ -2,10 +2,13 @@ package com.srishasti.controller;
 
 import com.srishasti.context.UserContext;
 import com.srishasti.model.Task;
+import com.srishasti.model.TaskResponse;
+import com.srishasti.model.TaskUpdate;
 import com.srishasti.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,20 +49,23 @@ public class TaskController {
     }
 
     @PostMapping("/tasks")
-    public ResponseEntity<Task> addTask(@Valid @RequestBody Task task){
-        Task newTask = taskService.addTask(task);
-        return new ResponseEntity<>(newTask, HttpStatus.OK);
+    public ResponseEntity<TaskResponse> addTask(@Valid @RequestBody Task task){
+        TaskUpdate update = taskService.addTask(task);
+        TaskResponse response = new TaskResponse(update);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/tasks/{taskId}")
-    public ResponseEntity<?> completeTask(@PathVariable int taskId){
-        String string = taskService.completeTask(taskId);
-        return new ResponseEntity<>(statusMap.getOrDefault(string,HttpStatus.INTERNAL_SERVER_ERROR));
+    public ResponseEntity<TaskResponse> completeTask(@PathVariable int taskId){
+        TaskUpdate update = taskService.completeTask(taskId);
+        TaskResponse response = new TaskResponse(update);
+        return new ResponseEntity<>(response,statusMap.getOrDefault(update.getStatus(),HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     @DeleteMapping("/tasks/{taskId}")
-    public ResponseEntity<?> deleteTask(@PathVariable int taskId){
-        String string = taskService.deleteTask(taskId);
-        return new ResponseEntity<>(statusMap.getOrDefault(string,HttpStatus.INTERNAL_SERVER_ERROR));
+    public ResponseEntity<TaskResponse> deleteTask(@PathVariable int taskId){
+        TaskUpdate update = taskService.deleteTask(taskId);
+        TaskResponse response = new TaskResponse(update);
+        return new ResponseEntity<>(response,statusMap.getOrDefault(update.getStatus(),HttpStatus.INTERNAL_SERVER_ERROR));
     }
 }
